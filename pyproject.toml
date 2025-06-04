@@ -1,0 +1,11 @@
+[build-system]
+requires = ["uv>=0.1"]
+build-backend = "uv"
+
+[project]
+name = "rag-inspector"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
