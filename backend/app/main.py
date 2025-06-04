@@ -3,15 +3,19 @@ from typing import List
 from uuid import uuid4
 from pathlib import Path
 
+from .utils import extract_text, chunk_text
+from .db import init_db, save_document_with_chunks
+
 app = FastAPI()
 
 UPLOAD_DIR = Path("data/uploads")
 
 
 @app.on_event("startup")
-async def ensure_upload_dir() -> None:
-    """Ensure the temporary upload directory exists."""
+async def startup() -> None:
+    """Prepare upload directory and database."""
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    init_db()
 
 @app.get("/")
 async def read_root():
@@ -43,6 +47,10 @@ async def upload_files(files: List[UploadFile] = File(...)):
 
         with open(save_path, "wb") as f:
             f.write(data)
+
+        text = extract_text(save_path)
+        chunks = chunk_text(text)
+        save_document_with_chunks(doc_id, upload.filename, chunks)
 
         uploaded.append(
             {

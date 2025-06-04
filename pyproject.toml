@@ -14,4 +14,7 @@ dependencies = [
     "pydantic",
     "python-multipart",
     "jinja2",
+    "beautifulsoup4",
+    "pdfminer.six",
+    "sqlmodel",
 ]
