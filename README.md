@@ -17,3 +17,9 @@ Create a virtual environment and install requirements:
 uv venv
 uv pip install -r requirements.txt
 ```
+
+Run the development server:
+
+```bash
+uvicorn backend.app.main:app --reload
+```
