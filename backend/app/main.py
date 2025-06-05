@@ -4,17 +4,20 @@ from uuid import uuid4
 from pathlib import Path
 
 from .utils import extract_text, chunk_text
-from .db import init_db, save_document_with_chunks
+from .storage import (
+    init_db,
+    save_document_with_chunks,
+    save_upload,
+    UPLOAD_DIR,
+)
+from .models import UploadedFile
 
 app = FastAPI()
-
-UPLOAD_DIR = Path("data/uploads")
 
 
 @app.on_event("startup")
 async def startup() -> None:
     """Prepare upload directory and database."""
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     init_db()
 
 @app.get("/")
@@ -45,22 +48,21 @@ async def upload_files(files: List[UploadFile] = File(...)):
         doc_id = str(uuid4())
         save_path = UPLOAD_DIR / f"{doc_id}{ext}"
 
-        with open(save_path, "wb") as f:
-            f.write(data)
+        save_upload(data, save_path)
 
         text = extract_text(save_path)
         chunks = chunk_text(text)
         save_document_with_chunks(doc_id, upload.filename, chunks)
 
         uploaded.append(
-            {
-                "document_id": doc_id,
-                "filename": upload.filename,
-                "size": len(data),
-            }
+            UploadedFile(
+                document_id=doc_id,
+                filename=upload.filename,
+                size=len(data),
+            )
         )
 
-    return {"files": uploaded}
+    return {"files": [file.model_dump() for file in uploaded]}
 
 if __name__ == "__main__":
     import uvicorn

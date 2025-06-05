@@ -23,3 +23,13 @@ Run the development server:
 ```bash
 uvicorn backend.app.main:app --reload
 ```
+
+## Database
+
+The backend persists metadata in a small SQLite database at
+`data/database.db`. Tables are created automatically on startup, but you can
+also initialize them manually:
+
+```bash
+python -c "from backend.app.storage import init_db; init_db()"
+```
