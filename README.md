@@ -1,49 +1,64 @@
-# RAG-Inspector
+# RAG Inspector
 
-This project uses [uv](https://github.com/astral-sh/uv) to manage Python dependencies.
-Dependencies are defined in `pyproject.toml`.
+RAG Inspector is a minimal project demonstrating a retrieval-augmented generation (RAG)
+evaluation workflow. It exposes a FastAPI backend for uploading documents, running stub
+evaluations, and exporting reports, alongside a small static frontend.
+
+## Goals
+
+- Ingest documents and break them into chunks for retrieval
+- Evaluate retrieval and answer quality metrics
+- Persist metadata in SQLite and export results as CSV or PDF
+
+## Directory Layout
+
+```
+backend/       FastAPI application and storage utilities
+frontend/      Placeholder web UI served separately
+data/          Local database and uploaded files
+pyproject.toml Python package configuration
+requirements.txt List of packages for `uv` to install
+```
 
 ## Setup
 
-Install uv with pip:
+[RAG Inspector](https://github.com/astral-sh/uv) uses `uv` to manage Python
+dependencies.
 
-```bash
-pip install uv
-```
+1. Install `uv`:
+   ```bash
+   pip install uv
+   ```
+2. Create a virtual environment and install requirements:
+   ```bash
+   uv venv
+   uv pip install -r requirements.txt
+   ```
 
-Create a virtual environment and install requirements:
+## Running the Backend
 
-```bash
-uv venv
-uv pip install -r requirements.txt
-```
-
-Run the development server:
+Start the API with [Uvicorn](https://www.uvicorn.org/):
 
 ```bash
 uvicorn backend.app.main:app --reload
 ```
 
-## Database
+The API provides endpoints to upload files (`/upload`), trigger an evaluation
+(`/evaluate`), and download generated reports (`/reports/{filename}`).
 
-The backend persists metadata in a small SQLite database at
-`data/database.db`. Tables are created automatically on startup, but you can
-also initialize them manually:
+## Running the Frontend
 
-```bash
-python -c "from backend.app.storage import init_db; init_db()"
-```
-
-## Evaluation
-
-Run a stub evaluation and generate report files:
+A very small HTML page lives in the `frontend` directory. Serve it with any static
+file server, e.g.:
 
 ```bash
-curl -X POST http://localhost:8000/evaluate
+python -m http.server 8001 --directory frontend
 ```
 
-Download a generated report:
+Then open <http://localhost:8001> in your browser.
 
-```bash
-curl -O http://localhost:8000/reports/evaluation.csv
-```
+## Documentation Links
+
+- [FastAPI documentation](https://fastapi.tiangolo.com/)
+- [Uvicorn documentation](https://www.uvicorn.org/)
+- [uv documentation](https://github.com/astral-sh/uv)
