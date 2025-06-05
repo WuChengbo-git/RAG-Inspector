@@ -17,4 +17,5 @@ dependencies = [
     "beautifulsoup4",
     "pdfminer.six",
     "sqlmodel",
+    "fpdf2",
 ]
