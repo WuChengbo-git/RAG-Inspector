@@ -33,3 +33,17 @@ also initialize them manually:
 ```bash
 python -c "from backend.app.storage import init_db; init_db()"
 ```
+
+## Evaluation
+
+Run a stub evaluation and generate report files:
+
+```bash
+curl -X POST http://localhost:8000/evaluate
+```
+
+Download a generated report:
+
+```bash
+curl -O http://localhost:8000/reports/evaluation.csv
+```

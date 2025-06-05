@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import FileResponse
 from typing import List
 from uuid import uuid4
 from pathlib import Path
@@ -11,8 +12,12 @@ from .storage import (
     UPLOAD_DIR,
 )
 from .models import UploadedFile
+from .services import AnswerEvaluator, Scorer, Reporter
+from .core.config import settings
 
 app = FastAPI()
+
+REPORT_DIR = Path(settings.report_dir)
 
 
 @app.on_event("startup")
@@ -63,6 +68,34 @@ async def upload_files(files: List[UploadFile] = File(...)):
         )
 
     return {"files": [file.model_dump() for file in uploaded]}
+
+
+@app.post("/evaluate")
+async def evaluate() -> dict:
+    """Run a stub evaluation and generate reports."""
+    evaluator = AnswerEvaluator()
+    scorer = Scorer()
+    question = "example question"
+    answers = evaluator.answer(question)
+    reference = "reference answer"
+    scores = []
+    for version, answer in answers.items():
+        retrieval = scorer.retrieval_accuracy([version], [version])
+        aqual = scorer.answer_quality(reference, answer)
+        scores.append(scorer.combine_scores(version, retrieval, aqual))
+    reporter = Reporter(REPORT_DIR)
+    csv_path = reporter.to_csv(scores, "evaluation.csv")
+    pdf_path = reporter.to_pdf(scores, "evaluation.pdf")
+    return {"csv": csv_path.name, "pdf": pdf_path.name}
+
+
+@app.get("/reports/{filename}")
+async def get_report(filename: str) -> FileResponse:
+    """Download a generated report file."""
+    path = REPORT_DIR / filename
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Report not found")
+    return FileResponse(path)
 
 if __name__ == "__main__":
     import uvicorn
