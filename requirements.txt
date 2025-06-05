@@ -7,3 +7,5 @@ beautifulsoup4
 pdfminer.six
 sqlmodel
 fpdf2
+pydantic-settings
+pytest
